@@ -27,13 +27,17 @@ CREATE TABLE recipes (
 );
 
 CREATE TABLE recipe_product_rels (
-    recipe INTEGER PRIMARY KEY REFERENCES recipes(id) ON DELETE CASCADE,
-    product INTEGER PRIMARY KEY REFERENCES products(id) ON DELETE RESTRICT,
-    amount REAL DEFAULT 0
+    recipe INTEGER REFERENCES recipes(id) ON DELETE CASCADE,
+    product INTEGER REFERENCES products(id) ON DELETE RESTRICT,
+    amount REAL DEFAULT 0,
+
+    PRIMARY KEY(recipe, product)
 );
 
 CREATE TABLE nested_recipes (
-    aggregate INTEGER PRIMARY KEY REFERENCES recipes(id) ON DELETE CASCADE,
-    component INTEGER PRIMARY KEY REFERENCES recipes(id) ON DELETE RESTRICT,
-    amount REAL DEFAULT 0
+    aggregate INTEGER REFERENCES recipes(id) ON DELETE CASCADE,
+    component INTEGER REFERENCES recipes(id) ON DELETE RESTRICT,
+    amount REAL DEFAULT 0,
+
+    PRIMARY KEY(aggregate, component)
 );
