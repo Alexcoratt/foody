@@ -4,7 +4,7 @@
 
 source=$(dirname $0)/tables.sql
 REGEX="^\s*CREATE TABLE ([A-Za-z0-9_]+)\s*\(?\$"
-FORMAT="DROP TABLE IF EXISTS %s CASCADE;"
+FORMAT="DROP TABLE IF EXISTS %s CASCADE;\n"
 
 # manually entered filename checking
 
@@ -22,13 +22,8 @@ fi
 # query building
 
 TABLE_NAMES=$(sed -E "s/$REGEX/\1/p" -n $source)
-query=""
 
 for name in $TABLE_NAMES
 do
-    query="$query$(printf "$FORMAT" $name)\n"
+    printf "$FORMAT" $name
 done
-
-query="$query\n\\i $source"
-
-echo $query
