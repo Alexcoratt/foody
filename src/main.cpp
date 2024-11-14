@@ -1,7 +1,21 @@
+#include <cerrno>
 #include <iostream>
+#include <fstream>
+#include <nlohmann/json.hpp>
+
+#define STATUS_SUCCESS 0
 
 int main(int argc, char **argv) {
-    std::cout << "Hello world!\n";
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <config>\n";
+        return E2BIG;
+    }
 
-    return 0;
+    std::ifstream ifile(argv[1]);
+    auto config = nlohmann::json::parse(ifile);
+    ifile.close();
+
+    std::cout << config << std::endl;
+
+    return STATUS_SUCCESS;
 }

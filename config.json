@@ -1,0 +1,13 @@
+{
+    "sql": {
+        "db-name": "foody",
+
+        "table-names": {
+            "user-table": "users",
+            "product-table": "products",
+            "nutritional-table": "nutritional_values",
+            "recipe-product-relations-table": "recipe_products_rels",
+            "recipe-table": "recipes"
+        }
+    }
+}
