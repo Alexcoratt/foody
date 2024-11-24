@@ -14,7 +14,7 @@ CREATE TABLE products (
 
     proteins REAL DEFAULT 0,
     fats REAL DEFAULT 0,
-    carbonohydrates REAL DEFAULT 0,
+    carbohydrates REAL DEFAULT 0,
     calories REAL DEFAULT 0
 );
 
