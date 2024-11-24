@@ -1,6 +1,7 @@
 #include <cerrno>
 #include <iostream>
 #include <fstream>
+#include <pqxx/connection.hxx>
 #include <sstream>
 
 #include <termios.h>
@@ -11,12 +12,15 @@
 
 #define STATUS_SUCCESS 0
 
-void printConnString(std::ostream &out, const nlohmann::json &config, const std::string &password);
+// auxillary function declarations
+
+std::string makeConnString(const nlohmann::json &config);
+std::string getPasswordFromConfig(const nlohmann::json &config);
 std::string readPassword(const std::string &prompt);
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " <config>\n";
+        std::cerr << "usage: " << argv[0] << " <config>\n";
         return EINVAL;
     }
 
@@ -26,16 +30,50 @@ int main(int argc, char **argv) {
 
     auto sqlConfig = config.at("sql");
 
-    std::stringstream connStr;
-    printConnString(connStr, sqlConfig, readPassword("password: "));
-     
-    pqxx::connection conn(connStr.str());
-    if (conn.is_open())
-        std::cout << "connection established\n";
-    else
-        std::cout << "connection failed\n";
+    pqxx::connection conn(makeConnString(sqlConfig));
+    std::cout << "connection:\t" << (conn.is_open() ? "OK" : "FAIL") << std::endl;
+
+    pqxx::work pqwork(conn);
+
+    std::cout << "query results:\n";
+    auto res = pqwork.exec("SELECT * FROM users;");
+    for (auto row : res)
+        std::cout << row["id"] << ' ' << row["login"] << ' ' << row["bio"] << std::endl;
 
     return STATUS_SUCCESS;
+}
+
+// definitions
+
+std::string makeConnString(const nlohmann::json &config) {
+    const std::string username = config.at("username");
+
+    std::stringstream res;
+    res << "postgresql://" << username;
+    
+    std::string password = getPasswordFromConfig(config);
+    if (!password.empty())
+        res << ':' << password;
+    
+    res << '@' 
+        << config.value("host", "localhost") << ':'
+        << config.value("port", 5432) << '/'
+        << config.value("db-name", username)
+    ;
+
+    return res.str();
+}
+
+std::string getPasswordFromConfig(const nlohmann::json &config) {
+    const auto noPass = config.value("no-pass", false);
+    if (!noPass) {
+        const auto found = config.find("password");
+        if (found != config.end())
+            return *found;
+        return readPassword("password: ");
+    }
+
+    return std::string();
 }
 
 std::string readPassword(const std::string &prompt) {
@@ -54,16 +92,4 @@ std::string readPassword(const std::string &prompt) {
     tcsetattr(STDIN_FILENO, TCSANOW, &oldTermSettings); // restore old settings
 
     return password;
-}
-
-void printConnString(std::ostream &out, const nlohmann::json &config, const std::string &password) {
-    const std::string username = config.at("username");
-    out
-        << "postgresql://"
-        << username << ':'
-        << password << '@' 
-        << config.value("host", "localhost") << ':'
-        << config.value("port", 5432) << '/'
-        << config.value("db-name", username)
-    ;
 }
