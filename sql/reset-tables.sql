@@ -34,12 +34,3 @@ CREATE TABLE recipe_products (
 
     PRIMARY KEY(recipe_id, product_id)
 );
-
-DROP TABLE IF EXISTS nested_recipes;
-CREATE TABLE nested_recipes (
-    aggregate_id INTEGER REFERENCES recipes(id) ON DELETE CASCADE,
-    component_id INTEGER REFERENCES recipes(id) ON DELETE RESTRICT,
-    amount REAL DEFAULT 0,
-
-    PRIMARY KEY(aggregate_id, component_id)
-);

@@ -39,11 +39,7 @@ VALUES
     (3, 1, 0.2),
     (3, 3, 0.4),
 
-    (4, 1, 0.2)
-;
-
-TRUNCATE TABLE nested_recipes;
-INSERT INTO nested_recipes (aggregate_id, component_id, amount)
-VALUES
+    (4, 1, 0.2),
+    (4, 2, 0.1),
     (4, 3, 0.5)
 ;
